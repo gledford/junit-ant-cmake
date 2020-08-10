@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project basedir="." default="test-all" name="TestJUnit">
+	
+    <property name="src.dir" value="src" />
+    <property name="test.src.dir" value="src/test" />
+    <property name="build.dir" value="build/ant-build" />
+    <property name="classes.dir" value="${build.dir}/classes" />
+    <property name="test.classes.dir" value="${build.dir}/test-classes" />
+    <property name="reports.dir" value="${build.dir}/reports" />
+ 
+    <path id="JUnit 5.libraryclasspath">
+        <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.api_5.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.engine_5.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.migrationsupport_5.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.params_5.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.platform.commons_1.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.platform.engine_1.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.platform.launcher_1.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.platform.runner_1.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.platform.suite.api_1.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit.vintage.engine_5.4.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.opentest4j_1.1.1.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.apiguardian_1.0.0.v20190212-2109.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.junit_4.12.0.v201504281640/junit.jar"/>
+        <pathelement location="../../.p2/pool/plugins/org.hamcrest.core_1.3.0.v20180420-1519.jar"/>
+    </path>
+	
+    <path id="app.classpath">
+        <pathelement location="${classes.dir}"/>
+        <path refid="JUnit 5.libraryclasspath"/>
+    </path>
+	
+    <target name="init">
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${test.classes.dir}"/>
+        <mkdir dir="${reports.dir}/"/>
+        <mkdir dir="${reports.dir}/junit"/>
+    </target>
+	
+    <target name="clean" description="Cleanup build files">
+        <delete dir="${build.dir}"/>
+    </target>
+			
+    <target name="compile" depends="init" description="Compile source code">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false" debug="true" classpathref="app.classpath"/>
+    </target>
+        	
+    <target name="compile-tests" depends="compile" description="Compile test source code">
+        <javac srcdir="${test.src.dir}" destdir="${test.classes.dir}" includeantruntime="false" debug="true">
+            <classpath>
+                <path refid="app.classpath"/>
+                <pathelement path="${classes.dir}"/>
+            </classpath>
+        </javac>
+    </target>
+	
+	<!-- Add individual unit tests here -->
+	<target depends="compile-tests" name="HelloWorldTest">
+        <junit printsummary="yes" haltOnFailure="true" haltOnError="true">
+            <formatter type="plain" usefile="false"/>
+            <classpath refid="app.classpath"/>
+        	<test name="test.java.HelloWorldTest"/>
+        </junit>
+	</target>
+	
+	<target depends="compile-tests" name="ControllerTest">
+        <junit printsummary="yes" haltOnFailure="true" haltOnError="true">
+            <formatter type="plain" usefile="false"/>
+            <classpath refid="app.classpath"/>
+        	<test name="test.java.ControllerTest"/>
+        </junit>
+	</target>
+
+	<!-- Add your test target to this target for running all of the tests -->
+	<target depends="HelloWorldTest, ControllerTest" name="test-all">
+    </target>
+	
+	<!-- Coverage -->
+    <target name="test-report" depends="test-all"> 
+        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml"  classpathref="app.classpath"/>
+        <jacoco:report xmlns:jacoco="antlib:org.jacoco.ant">
+            <executiondata>
+                <file file="${build.dir}/jacoco.exec" />
+            </executiondata>
+ 
+            <structure name="JaCoCo Ant Example">
+                <classfiles>
+                    <fileset dir="${classes.dir}" />
+                </classfiles>
+                <sourcefiles encoding="UTF-8">
+                    <fileset dir="${src.dir}" />
+                </sourcefiles>
+            </structure>
+             
+            <html destdir="${reports.dir}" />
+        </jacoco:report>
+    </target>
+</project>
