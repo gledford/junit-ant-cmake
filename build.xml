@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project basedir="." default="report" name="TestJUnit">
 	
-    <property name="src.dir" value="src/main/java" />
-    <property name="test.src.dir" value="src/test/java" />
+    <property name="src.dir" value="src" />
+    <property name="test.src.dir" value="src" />
     <property name="build.dir" value="build/ant" />
-    <property name="classes.dir" value="${build.dir}/classes" />
-    <property name="test.classes.dir" value="${build.dir}/test/classes" />
+    <property name="classes.dir" value="${build.dir}/classes/" />
+    <property name="test.classes.dir" value="${build.dir}/test-classes" />
     <property name="reports.dir" value="${build.dir}/reports" />
- 
+	
     <path id="unit-test.classpath">
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.api_5.4.0.v20190212-2109.jar"/>
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.engine_5.4.0.v20190212-2109.jar"/>
@@ -50,26 +50,56 @@
             <classpath>
                 <path refid="app.classpath"/>
                 <pathelement path="${classes.dir}"/>
-            	<pathelement path="${test.classes.dir}"/>
             </classpath>
         </javac>
     </target>
 	
 	<target depends="compile-tests" name="test-all">
 		<mkdir dir="${reports.dir}"/>
-		<junit printsummary="yes" haltonerror="yes" haltonfailure="yes">
-            <formatter type="plain" usefile="false"/>
-            <formatter type="xml"/>
-            <batchtest todir="${reports.dir}">
-                <fileset dir="${test.src.dir}">
-                    <include name="**/*Test.java"/>
-                </fileset>
-            </batchtest>
-			<classpath refid="app.classpath"/>
-        </junit>
+		<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+		        <classpath path="${basedir}/../jacoco-0.8.5/lib/jacocoant.jar"/>
+		</taskdef>
+	    <jacoco:coverage destfile="${build.dir}/jacoco.exec" xmlns:jacoco="antlib:org.jacoco.ant">
+			<junit printsummary="yes" fork="true" forkmode="once" haltonerror="yes" haltonfailure="yes">
+	            <formatter type="plain" usefile="false"/>
+				<classpath>
+					<path refid="app.classpath"/>
+					<pathelement path="${classes.dir}"/>
+					<pathelement path="${test.classes.dir}"/>
+				</classpath>
+	            <formatter type="xml"/>
+	            <batchtest todir="${reports.dir}">
+	                <fileset dir="${test.src.dir}">
+	                    <include name="**/*Test*.java"/>
+	                </fileset>
+	            </batchtest>
+	        </junit>
+	    </jacoco:coverage>
+
     </target>
 	
-    <target name="report" depends="test-all">
+	<target name="generate-coverage" depends="test-all">
+		<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+		        <classpath path="${basedir}/../jacoco-0.8.5/lib/jacocoant.jar"/>
+		</taskdef>
+	    <jacoco:report xmlns:jacoco="antlib:org.jacoco.ant">
+	        <executiondata>
+	            <file file="${build.dir}/jacoco.exec" />
+	        </executiondata>
+
+	        <structure name="Jacoco">
+	            <classfiles>
+	                <fileset dir="${classes.dir}" />
+	            </classfiles>
+	            <sourcefiles encoding="UTF-8">
+	                <fileset dir="${basedir}/src" />
+	            </sourcefiles>
+	        </structure>
+	        <html destdir="${reports.dir}/coverage" />
+	    </jacoco:report>
+	</target>
+	
+    <target name="report" depends="generate-coverage">
     	<exec dir="${basedir}/scripts" executable="python3">
     		<arg line='junit_report_collector.py -dir ${basedir}/${reports.dir}'/>
     	</exec>
