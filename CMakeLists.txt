@@ -7,18 +7,18 @@ enable_testing()
 
 project (TestJUnit NONE)
 
+#Runs all of the unit tests within the build.xml file but CTest recognizes
+#the results as a single test suite known as TestJUnit	
 add_test(
 	NAME 
-		ControllerTest 
+		TestJUnit 
 	COMMAND 
-		/usr/local/bin/ant -f ../build.xml ControllerTest)
+		/usr/local/bin/ant -f ../build.xml)
 		
-add_test(
-	NAME 
-		HelloWorldTest 
-	COMMAND 
-		/usr/local/bin/ant -f ../build.xml HelloWorldTest)
-		
-add_custom_target(App_TestCoverage
+#This gathers all of the XML files and merges into a single roll-up report
+#Might be a good idea for the Test SMEs when gathering the entire repo metrics
+add_custom_target(collect-junit-results
 	COMMAND
-		ctest -VV; echo 'Run jacoco')
+		/Users/gledford/git/JUnitReportCollector/junit_report_collector.py -dir ../
+	VERBATIM
+)

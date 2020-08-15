@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project basedir="." default="test-all" name="TestJUnit">
+<project basedir="." default="report" name="TestJUnit">
 	
-    <property name="src.dir" value="src" />
-    <property name="test.src.dir" value="src/test" />
-    <property name="build.dir" value="build/ant-build" />
+    <property name="src.dir" value="src/main/java" />
+    <property name="test.src.dir" value="src/test/java" />
+    <property name="build.dir" value="build/ant" />
     <property name="classes.dir" value="${build.dir}/classes" />
-    <property name="test.classes.dir" value="${build.dir}/test-classes" />
+    <property name="test.classes.dir" value="${build.dir}/test/classes" />
     <property name="reports.dir" value="${build.dir}/reports" />
  
-    <path id="JUnit 5.libraryclasspath">
+    <path id="unit-test.classpath">
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.api_5.4.0.v20190212-2109.jar"/>
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.engine_5.4.0.v20190212-2109.jar"/>
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.migrationsupport_5.4.0.v20190212-2109.jar"/>
@@ -27,14 +27,14 @@
 	
     <path id="app.classpath">
         <pathelement location="${classes.dir}"/>
-        <path refid="JUnit 5.libraryclasspath"/>
+    	<pathelement location="${test.classes.dir}"/>
+        <path refid="unit-test.classpath"/>
     </path>
 	
     <target name="init">
         <mkdir dir="${classes.dir}"/>
         <mkdir dir="${test.classes.dir}"/>
         <mkdir dir="${reports.dir}/"/>
-        <mkdir dir="${reports.dir}/junit"/>
     </target>
 	
     <target name="clean" description="Cleanup build files">
@@ -50,49 +50,28 @@
             <classpath>
                 <path refid="app.classpath"/>
                 <pathelement path="${classes.dir}"/>
+            	<pathelement path="${test.classes.dir}"/>
             </classpath>
         </javac>
     </target>
 	
-	<!-- Add individual unit tests here -->
-	<target depends="compile-tests" name="HelloWorldTest">
-        <junit printsummary="yes" haltOnFailure="true" haltOnError="true">
+	<target depends="compile-tests" name="test-all">
+		<mkdir dir="${reports.dir}"/>
+		<junit printsummary="yes" haltonerror="yes" haltonfailure="yes">
             <formatter type="plain" usefile="false"/>
-            <classpath refid="app.classpath"/>
-        	<test name="test.java.HelloWorldTest"/>
+            <formatter type="xml"/>
+            <batchtest todir="${reports.dir}">
+                <fileset dir="${test.src.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+			<classpath refid="app.classpath"/>
         </junit>
-	</target>
-	
-	<target depends="compile-tests" name="ControllerTest">
-        <junit printsummary="yes" haltOnFailure="true" haltOnError="true">
-            <formatter type="plain" usefile="false"/>
-            <classpath refid="app.classpath"/>
-        	<test name="test.java.ControllerTest"/>
-        </junit>
-	</target>
-
-	<!-- Add your test target to this target for running all of the tests -->
-	<target depends="HelloWorldTest, ControllerTest" name="test-all">
     </target>
 	
-	<!-- Coverage -->
-    <target name="test-report" depends="test-all"> 
-        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml"  classpathref="app.classpath"/>
-        <jacoco:report xmlns:jacoco="antlib:org.jacoco.ant">
-            <executiondata>
-                <file file="${build.dir}/jacoco.exec" />
-            </executiondata>
- 
-            <structure name="JaCoCo Ant Example">
-                <classfiles>
-                    <fileset dir="${classes.dir}" />
-                </classfiles>
-                <sourcefiles encoding="UTF-8">
-                    <fileset dir="${src.dir}" />
-                </sourcefiles>
-            </structure>
-             
-            <html destdir="${reports.dir}" />
-        </jacoco:report>
+    <target name="report" depends="test-all">
+    	<exec dir="${basedir}/scripts" executable="python3">
+    		<arg line='junit_report_collector.py -dir ${basedir}/${reports.dir}'/>
+    	</exec>
     </target>
 </project>
