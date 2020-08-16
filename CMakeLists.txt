@@ -1,8 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
 
-#find_package(Java REQUIRED)
-#include(UseJava)
-
 enable_testing()
 
 project (TestJUnit NONE)

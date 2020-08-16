@@ -24,7 +24,8 @@ class JUnitReportCollector:
                 self.__create_rollup__()
                 self.__print_summary__()
             else:
-                print('ERROR: Unable to find any files matching TEST-*.xml to create the JUnit report')
+                print(
+                    'ERROR: Unable to find any files matching TEST-*.xml to create the JUnit report')
                 exit(1)
         else:
             print('ERROR: The provided directory does not exist %s' % root_path)
@@ -32,7 +33,8 @@ class JUnitReportCollector:
 
     def __create_rollup__(self) -> None:
         if os.path.isdir(self.root_path):
-            new_report = open(os.path.join(self.root_path, self.output_report_name), 'w')
+            new_report = open(os.path.join(
+                self.root_path, self.output_report_name), 'w')
             new_report.write('<?xml version="1.0" encoding="UTF-8" ?>\n')
             new_report.write('<testsuites>\n')
 
@@ -50,17 +52,21 @@ class JUnitReportCollector:
                     if not is_first:
                         new_report.write(lines[i])
                         if '<testcase classname=' in lines[i]:
-                            test_suite = lines[i].split(' ')[3].strip('classname=').strip("\"")
-                            test_case = lines[i].split(' ')[4].strip('name=').strip("\"")
+                            test_suite = lines[i].split(' ')[3].strip(
+                                'classname=').strip("\"")
+                            test_case = lines[i].split(
+                                ' ')[4].strip('name=').strip("\"")
                             if i < len(lines):
                                 if '<failure' in lines[i+1]:
-                                    self.failing_tests.append(test_suite + ':' + test_case)
+                                    self.failing_tests.append(
+                                        test_suite + ':' + test_case)
                                 else:
-                                    self.passing_tests.append(test_suite + ':' + test_case)
+                                    self.passing_tests.append(
+                                        test_suite + ':' + test_case)
                     else:
                         is_first = False
 
-    def __print_summary__(self):
+    def __print_summary__(self) -> None:
         print('Passing Tests... %s' % str(len(self.passing_tests)))
         print('Failing Tests... %s' % str(len(self.failing_tests)))
         if self.failing_tests:
@@ -73,8 +79,10 @@ class JUnitReportCollector:
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Recursively scans for JUnit report files to create a roll-up')
-    parser.add_argument('-dir', help='Directory to start searching from', required=True)
+    parser = argparse.ArgumentParser(
+        description='Recursively scans for JUnit report files to create a roll-up')
+    parser.add_argument(
+        '-dir', help='Directory to start searching from', required=True)
     args = parser.parse_args()
 
     report_collector = JUnitReportCollector()
