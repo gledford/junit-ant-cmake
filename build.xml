@@ -8,7 +8,7 @@
     <property name="test.classes.dir" value="${build.dir}/.test-classes" />
     <property name="reports.dir" value="${build.dir}/reports" />
 	
-    <path id="unit-test.classpath">
+    <path id="unit-test-tools.classpath">
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.api_5.4.0.v20190212-2109.jar"/>
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.engine_5.4.0.v20190212-2109.jar"/>
         <pathelement location="../../.p2/pool/plugins/org.junit.jupiter.migrationsupport_5.4.0.v20190212-2109.jar"/>
@@ -28,7 +28,7 @@
     <path id="app.classpath">
         <pathelement location="${classes.dir}"/>
     	<pathelement location="${test.classes.dir}"/>
-        <path refid="unit-test.classpath"/>
+        <path refid="unit-test-tools.classpath"/>
     </path>
 	
     <target name="init">
@@ -89,7 +89,9 @@
 
 	        <structure name="Jacoco">
 	            <classfiles>
-	                <fileset dir="${classes.dir}" />
+	                <fileset dir="${classes.dir}">
+	            		<exclude name="**/*Test*.class" />
+	                </fileset>
 	            </classfiles>
 	            <sourcefiles encoding="UTF-8">
 	                <fileset dir="${basedir}/src" />
@@ -97,6 +99,7 @@
 	        </structure>
 	        <html destdir="${reports.dir}/coverage" />
 	    	<xml destfile="${reports.dir}/coverage-report.xml" />
+	    	<csv destfile="${reports.dir}/coverage.csv" />
 	    </jacoco:report>
 	</target>
 	

@@ -1,11 +1,24 @@
 #!/usr/local/bin/python3
 
+"""
+This file contains the class used to collect the JUnit reports
+and merge them together.
+"""
+
 import fnmatch
 import os
 import argparse
+import sys
 
 
+# pylint: disable=too-few-public-methods
 class JUnitReportCollector:
+    """
+    This class scans for JUnit-generated XML files and merges them together
+    to create a roll-up of the pass/fail tests. This class also prints the number
+    of passing and failing tests along with the name of the failing tests
+    """
+
     def __init__(self):
         self.report_files = []
         self.output_report_name = 'TEST-AllJUnitTests.xml'
@@ -14,22 +27,25 @@ class JUnitReportCollector:
         self.root_path = ''
 
     def collect(self, root_path: str) -> None:
+        """
+        Finds the JUnit report XML files
+        """
         if os.path.isdir(root_path):
             self.root_path = root_path
-            for root, dirnames, filenames in os.walk(root_path):
-                for filename in fnmatch.filter(filenames, 'TEST-*.xml'):
+            for root, _, file_names in os.walk(root_path):
+                for filename in fnmatch.filter(file_names, 'TEST-*.xml'):
                     if filename != self.output_report_name:
                         self.report_files.append(os.path.join(root, filename))
             if self.report_files:
                 self.__create_rollup__()
                 self.__print_summary__()
             else:
-                print(
-                    'ERROR: Unable to find any files matching TEST-*.xml to create the JUnit report')
-                exit(1)
+                print('ERROR: Unable to find any files matching ' \
+                      'TEST-*.xml to create the JUnit report')
+                sys.exit(1)
         else:
             print('ERROR: The provided directory does not exist %s' % root_path)
-            exit(1)
+            sys.exit(1)
 
     def __create_rollup__(self) -> None:
         if os.path.isdir(self.root_path):
@@ -57,7 +73,7 @@ class JUnitReportCollector:
                             test_case = lines[i].split(
                                 ' ')[4].strip('name=').strip("\"")
                             if i < len(lines):
-                                if '<failure' in lines[i+1]:
+                                if '<failure' in lines[i + 1]:
                                     self.failing_tests.append(
                                         test_suite + ':' + test_case)
                                 else:
@@ -67,8 +83,6 @@ class JUnitReportCollector:
                         is_first = False
 
     def __print_summary__(self) -> None:
-        print('Passing Tests... %s' % str(len(self.passing_tests)))
-        print('Failing Tests... %s' % str(len(self.failing_tests)))
         if self.failing_tests:
             print('\nFailures:')
             count = 1
@@ -76,7 +90,10 @@ class JUnitReportCollector:
                 print(str(count) + '. ' + failing_test)
         print('\nJUnit Report Generation Complete. See %s' %
               os.path.join(os.path.abspath(self.root_path), self.output_report_name))
-
+        print("******JUnit Test Metrics******")
+        print('Passing Tests... %s' % str(len(self.passing_tests)))
+        print('Failing Tests... %s' % str(len(self.failing_tests)))
+        print("******JUnit Test Metrics******\n")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
