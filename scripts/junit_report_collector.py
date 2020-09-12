@@ -88,12 +88,11 @@ class JUnitReportCollector:
             count = 1
             for failing_test in self.failing_tests:
                 print(str(count) + '. ' + failing_test)
-        print('\nJUnit Report Generation Complete. See %s' %
-              os.path.join(os.path.abspath(self.root_path), self.output_report_name))
         print("******JUnit Test Metrics******")
         print('Passing Tests... %s' % str(len(self.passing_tests)))
         print('Failing Tests... %s' % str(len(self.failing_tests)))
         print("******JUnit Test Metrics******\n")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

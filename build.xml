@@ -98,7 +98,6 @@
 	            </sourcefiles>
 	        </structure>
 	        <html destdir="${reports.dir}/coverage" />
-	    	<xml destfile="${reports.dir}/coverage-report.xml" />
 	    	<csv destfile="${reports.dir}/coverage.csv" />
 	    </jacoco:report>
 	</target>

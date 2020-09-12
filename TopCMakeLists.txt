@@ -5,22 +5,13 @@ enable_testing()
 add_subdirectory(TestJUnit)
 add_subdirectory(TestJUnitv2)
 
-add_custom_target(junit-metrics-test-counts
-	COMMAND
-		/Users/gledford/eclipse-workspace/TestJUnit/scripts/junit_report_collector.py -dir ../
-	VERBATIM
-)
-
-add_custom_target(junit-metrics-coverage
-	COMMAND
-		/Users/gledford/eclipse-workspace/TestJUnit/scripts/jacoco_coverge_reader.py -dir .
-	VERBATIM
-    DEPENDS
-	    junit-metrics-test-counts
-)
-
+#Note: the script locations should not be inside of the src tree.
+# this is just for an example
 add_custom_target(junit-metrics
-    DEPENDS
-	    junit-metrics-test-counts
-	    junit-metrics-coverage
+	COMMAND
+		${CMAKE_CURRENT_SOURCE_DIR}/TestJUnit/scripts/junit_report_collector.py -dir ../
+	COMMAND
+		mv ../TEST-AllJUnitTests.xml .
+	COMMAND
+        ${CMAKE_CURRENT_SOURCE_DIR}/TestJUnit/scripts/jacoco_coverge_reader.py -dir .
 )
